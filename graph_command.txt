@@ -1,0 +1,54 @@
+# refererence genome : https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000001405.26/
+# refererence genome : https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/GRCh38_reference_genome/
+# Genomes above have different header, change headers if it is failed for further commands below
+# refererence genome variation : https://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/
+
+
+# if index error: index is older than vcf
+tabix -p vcf -f ./Genome_data/chr1.vcf.gz
+tabix -p vcf -f ./Genome_data/chr22.vcf.gz
+
+# build graph
+./vg/bin/vg construct -m 128 -r ./GWFA/Genome_data/GRCh38_chr1.fasta -v  ./Genome_data/chr1.vcf.gz   > ./out_graph/chr1.vg
+./vg/bin/vg construct -m 128 -r ./Genome_data/GRCh38_chr22.fasta -v ./Genome_data/chr22.vcf.gz  > ./out_graph/chr22.vg
+
+# if encounter error: no config in vcf or fasta
+# copy these two to replace the header
+# for chr1:
+# >1  AC:CM000663.2  gi:568336023  LN:248956422  rl:Chromosome  M5:6aef897c3d6ff0c78aff06ac189178dd  AS:GRCh38
+# for chr22:
+# >22  AC:CM000684.2  gi:568336002  LN:50818468  rl:Chromosome  M5:ac37ec46683600f808cdd41eac1d55cd  AS:GRCh38  hm:multiple
+# Remember to delete .fai file before re-running
+
+# sort nodes & convert to gfa
+./vg/bin/vg ids -s -i1 ./out_graph/chr22.vg > ./out_graph/chr22_sort.vg
+./vg/bin/vg convert -f ./out_graph/chr22_sort.vg > ./out_graph/chr22.gfa
+
+./vg/bin/vg ids -s -i1 ./out_graph/chr1.vg > ./out_graph/chr1_sort.vg
+./vg/bin/vg convert -f ./out_graph/chr1_sort.vg > ./out_graph/chr1.gfa
+
+
+# different node length
+./vg/bin/vg construct -m 1000000 -r Genome_data/GRCh38_chr22.fa -v Genome_data/chr22.vcf.gz > out_graph/chr22_long_node.vg
+./vg/bin/vg ids -s -i1 ./out_graph/chr22_long_node.vg > ./out_graph/chr22_sort_long_node.vg
+./vg/bin/vg convert -f ./out_graph/chr22_sort_long_node.vg > ./out_graph/chr22_long_node.gfa
+
+
+# Graph aligner
+GraphAligner -g ./out_graph/chr22_long_node.gfa -f ./pbsim/sd_0001_trim.fastq -a ./ga_out/align.gaf -x vg
+
+# GA with Timing
+docker cp "C:\Users\BL430\Desktop\GraphAligner_modify" e1fa93ff3662:/\
+cd GraphAligner_modify
+make bin/GraphAligner
+
+source activate GraphAligner
+./GraphAligner_modify/bin/GraphAligner -g ./out_graph/chr22_long_node.gfa -f ./pbsim_3k/3k_trim.fastq -a ./ga_out_3k/align.gaf -x vg --seeds-minimizer-windowsize 19 --threads 1
+./GraphAligner_modify/bin/GraphAligner -g ./out_graph/chr22_long_node.gfa -f ./pbsim_6k/6k_trim.fastq -a ./ga_out_6k/align.gaf -x vg --seeds-minimizer-windowsize 19 --threads 1
+./GraphAligner_modify/bin/GraphAligner -g ./out_graph/chr22_long_node.gfa -f ./pbsim_12k/12k_trim.fastq -a ./ga_out_12k/align.gaf -x vg --seeds-minimizer-windowsize 19 --threads 1
+
+
+# vg alignment
+./vg/bin/vg index -x ./index_graph/chr22.xg -g ./index_graph/chr22.gcsa -k 16 ./out_graph/chr22_sort.vg
+./vg/bin/vg map -f ./pbsim_3k/3k_trim.fastq -x ./index_graph/chr22.xg -g ./index_graph/chr22.gcsa -% ./vg_out/3k.gaf
+

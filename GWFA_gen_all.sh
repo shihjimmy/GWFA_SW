@@ -1,0 +1,5 @@
+bash GWFA_gen_sequence_err5.sh
+bash GWFA_gen_sequence_err15.sh
+bash GWFA_gen_sequence_err30.sh
+bash GWFA_gen_testdata.sh
+bash GWFA_run_github.sh

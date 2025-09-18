@@ -1,0 +1,9 @@
+gwfa-master/
+gwfa-tb-main/
+__pycache__/
+Genome_data/
+out_graph/
+out_sequence_*/
+pbsim3_trim_*/
+cpp/
+GWFA_result_all/
