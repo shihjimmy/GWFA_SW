@@ -1,2 +1,8 @@
 # GWFA_thesis_code
-code for GWFA , my thesis repo
+This is the modified version for original gwfa: https://github.com/lh3/gwfa
+
+I modified the code into a hardware friendly version
+
+1. tile
+2. tile connection -- retreat & border selection
+3. only propagate furthest wavefront on the diagonal
