@@ -5,5 +5,5 @@ I modified the code into a hardware friendly version
 
 1. Preprocessed graph 
 2. tile 256 x 256
-3. tile connection -- retreat & border selection
+3. tile connection -- retreat & border selection & continuous match
 4. only propagate furthest wavefront on the diagonal
