@@ -1,4 +1,4 @@
-# GWFA_thesis_code
+# GWFA_SW
 This is the modified version for original gwfa: https://github.com/lh3/gwfa
 
 I modified the code into a hardware friendly version
